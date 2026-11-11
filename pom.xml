@@ -52,7 +52,7 @@
         <!-- Versions not managed by the Spring Boot BOM -->
         <wiremock.version>3.13.2</wiremock.version>
         <jacoco-plugin.version>0.8.16</jacoco-plugin.version>
-        <exec-plugin.version>3.5.0</exec-plugin.version>
+        <exec-plugin.version>3.6.4</exec-plugin.version>
 
         <!-- The React app is built with the npm on the PATH; -Dviewer.skipUi=true reuses frontend/dist -->
         <viewer.ui.dir>${project.basedir}/frontend</viewer.ui.dir>
