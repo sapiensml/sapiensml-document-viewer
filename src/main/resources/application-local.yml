@@ -1,0 +1,16 @@
+# Local development: plain http on localhost, readable logs. Started by deploy/local/run-viewer.sh.
+server:
+  servlet:
+    session:
+      cookie:
+        # http://localhost cannot carry Secure cookies
+        secure: false
+
+viewer:
+  settings:
+    # A local Alfresco answers on http://localhost
+    allow-insecure-http: true
+
+logging:
+  level:
+    com.sapiensml.viewer: DEBUG

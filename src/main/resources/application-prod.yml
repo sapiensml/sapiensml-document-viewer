@@ -1,0 +1,5 @@
+# Servers (set by the systemd unit). Logging: JSON lines and the audit file, see logback-spring.xml.
+spring:
+  main:
+    # Every console line is JSON for journald and log shippers
+    banner-mode: off

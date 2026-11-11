@@ -1,0 +1,35 @@
+# systemd unit sapiensml-keycloak: Keycloak as the viewer's sign-in. install-keycloak.sh fills in the @...@ values.
+[Unit]
+Description=Keycloak (SapiensML Document Viewer sign-in)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=@KC_USER@
+Group=@KC_USER@
+EnvironmentFile=@ENV_FILE@
+# Imports deploy/keycloak's realm on the first start only; an existing realm is left as it is
+ExecStart=@KC_HOME@/bin/kc.sh start --optimized --import-realm
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=10
+TimeoutStartSec=300
+LimitNOFILE=65536
+
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+ReadWritePaths=@KC_HOME@/data
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

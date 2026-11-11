@@ -1,0 +1,52 @@
+# systemd unit for the SapiensML Document Viewer. install.sh fills in the @...@ values.
+[Unit]
+Description=SapiensML Document Viewer
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=@APP_USER@
+Group=@APP_USER@
+WorkingDirectory=@PREFIX@
+Environment=SPRING_PROFILES_ACTIVE=prod
+# The admin page's saved Alfresco connection: /var/lib/sapiensml-document-viewer, owned by the service user only
+StateDirectory=sapiensml-document-viewer
+StateDirectoryMode=0700
+Environment=VIEWER_SETTINGS_DIR=/var/lib/sapiensml-document-viewer
+# Every setting, secrets included; values here override the lines above
+EnvironmentFile=@ENV_FILE@
+ExecStart=@JAVA@ $JAVA_OPTS -jar @PREFIX@/current.jar
+# The JVM exits with 143 on SIGTERM after a graceful shutdown
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=10
+TimeoutStopSec=45
+LimitNOFILE=65536
+
+# Hardening: the viewer only reads its jar and config, writes its audit log and saved settings, and talks to
+# the network
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+RestrictNamespaces=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+ReadWritePaths=@LOG_DIR@
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,19 @@
+target/
+deploy/local/.work/
+deploy/local/local.env
+
+# Certificates, keys and real settings files never belong in the repository
+*.pfx
+*.p12
+*.jks
+*.key
+*.pem
+viewer.env
+viewer.properties
+
+# Editors and operating systems
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db

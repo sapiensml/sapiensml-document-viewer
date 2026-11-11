@@ -1,0 +1,69 @@
+# C:\ProgramData\SapiensML\viewer\viewer.properties: settings of the SapiensML Document Viewer on Windows, read by the viewer
+# at start-up (Java properties: KEY=value, use / in paths, a backslash must be written \\).
+# After a change: Restart-Service sapiensml-document-viewer
+# install.ps1 does not start the service while a value still reads CHANGE_ME.
+
+# ---- Sign-in (OpenID Connect) ----------------------------------------------------------------------------------
+# Keycloak: https://<keycloak host>[:port]/realms/<realm>. Okta: https://<org>.okta.com/oauth2/<authorization server id>
+VIEWER_OIDC_ISSUER_URI=https://CHANGE_ME/realms/sapiensml
+VIEWER_OIDC_CLIENT_ID=sapiensml-document-viewer
+VIEWER_OIDC_CLIENT_SECRET=CHANGE_ME
+VIEWER_OIDC_SCOPES=openid,profile,email
+VIEWER_OIDC_USERNAME_CLAIM=preferred_username
+# The claim with the user's roles or groups, and the values that may view documents (comma separated).
+# Keycloak (realm in deploy/keycloak): roles / DOCUMENT_VIEWER. Okta: groups / <the Okta group names>
+VIEWER_ROLES_CLAIM=roles
+VIEWER_ROLES=DOCUMENT_VIEWER
+VIEWER_ADMIN_ROLES=VIEWER_ADMIN
+# Keycloak brokering Okta: the identity provider alias, so users go straight to Okta
+#VIEWER_OIDC_IDP_HINT=okta
+
+# ---- Alfresco ---------------------------------------------------------------------------------------------------
+# Normally entered once on the admin page (https://<viewer>/admin); kept in VIEWER_SETTINGS_DIR with its secret
+# encrypted by VIEWER_SETTINGS_KEY (install.ps1 generates it: keep a copy in the password manager). Values set
+# here are used only until something is saved there.
+# Alfresco with repository users (Community or Enterprise), for example the SapiensML test repository:
+#VIEWER_ALFRESCO_BASE_URL=https://alfresco.sapiensml.com
+#VIEWER_ALFRESCO_AUTH=BASIC
+#VIEWER_ALFRESCO_USERNAME=
+#VIEWER_ALFRESCO_PASSWORD=
+# Alfresco PaaS, or Alfresco with the Identity Service (OAuth2 client credentials):
+#VIEWER_ALFRESCO_BASE_URL=https://<tenant>.alfrescocloud.com
+#VIEWER_ALFRESCO_AUTH=CLIENT_CREDENTIALS
+#VIEWER_ALFRESCO_TOKEN_URI=https://<tenant>.alfrescocloud.com/auth/realms/alfresco/protocol/openid-connect/token
+#VIEWER_ALFRESCO_CLIENT_ID=
+#VIEWER_ALFRESCO_CLIENT_SECRET=
+# Folders whose documents may open (node IDs, comma separated):
+#VIEWER_ALLOWED_FOLDER_IDS=<folder node id>,<folder node id>
+VIEWER_ALFRESCO_READ_TIMEOUT=60s
+VIEWER_ALLOWED_NODE_TYPES=
+VIEWER_SETTINGS_KEY=
+VIEWER_SETTINGS_DIR=C:/ProgramData/SapiensML/viewer/data
+
+# ---- Viewer -------------------------------------------------------------------------------------------------------
+VIEWER_APP_NAME=SapiensML Document Viewer
+VIEWER_ALLOW_DOWNLOAD=false
+VIEWER_ALLOW_PRINT=true
+VIEWER_FRAME_ANCESTORS=
+VIEWER_SESSION_TIMEOUT=30m
+
+# ---- Server -------------------------------------------------------------------------------------------------------
+# On Windows the viewer serves HTTPS itself (no nginx): install.ps1 fills in the certificate below.
+# Behind IIS or a load balancer that terminates TLS instead: VIEWER_ADDRESS=127.0.0.1, VIEWER_PORT=8080 and
+# server.ssl.enabled=false.
+VIEWER_ADDRESS=0.0.0.0
+VIEWER_PORT=443
+server.ssl.enabled=false
+#server.ssl.key-store=file:C:/ProgramData/SapiensML/tls/server.pfx
+#server.ssl.key-store-type=PKCS12
+#server.ssl.key-store-password=
+VIEWER_MANAGEMENT_PORT=8081
+VIEWER_MANAGEMENT_ADDRESS=127.0.0.1
+VIEWER_COOKIE_SECURE=true
+VIEWER_AUDIT_DIR=C:/ProgramData/SapiensML/viewer/logs
+VIEWER_AUDIT_RETENTION_DAYS=400
+VIEWER_LOG_LEVEL=INFO
+
+# Options for the Java runtime; install.ps1 copies them into the service definition (run it again after a change).
+# Outbound proxy: add -Dhttps.proxyHost=<host> -Dhttps.proxyPort=<port>
+JAVA_OPTS=-Xms256m -Xmx768m -XX:+ExitOnOutOfMemoryError -Dfile.encoding=UTF-8

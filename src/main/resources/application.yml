@@ -1,0 +1,127 @@
+# SapiensML Document Viewer. Every value an environment needs to change comes from an environment variable; on a
+# server they live in /etc/sapiensml-document-viewer/viewer.env (see deploy/linux/viewer.env.example).
+spring:
+  application:
+    name: sapiensml-document-viewer
+  threads:
+    virtual:
+      # Each content stream holds a thread while it copies; virtual threads make that cheap
+      enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          viewer:
+            provider: idp
+            client-id: ${VIEWER_OIDC_CLIENT_ID:sapiensml-document-viewer}
+            client-secret: ${VIEWER_OIDC_CLIENT_SECRET:}
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: ${VIEWER_OIDC_SCOPES:openid,profile,email}
+        provider:
+          idp:
+            # Keycloak: https://<host>/realms/<realm>. Okta: https://<org>.okta.com/oauth2/<server id>.
+            # Read at start-up (OpenID discovery), so the identity provider must be reachable then.
+            issuer-uri: ${VIEWER_OIDC_ISSUER_URI:http://localhost:18210/realms/sapiensml}
+            user-name-attribute: ${VIEWER_OIDC_USERNAME_CLAIM:preferred_username}
+  wins:
+    resources:
+      # Only the React build is served; nothing else on the classpath
+      static-locations: classpath:/static/
+
+server:
+  port: ${VIEWER_PORT:8080}
+  address: ${VIEWER_ADDRESS:0.0.0.0}
+  shutdown: graceful
+  # Behind nginx: trust X-Forwarded-For/Proto/Host from internal proxies only (Tomcat's RemoteIpValve), so
+  # redirect URIs, secure cookies and audit IPs are right
+  forward-headers-strategy: native
+  servlet:
+    session:
+      timeout: ${VIEWER_SESSION_TIMEOUT:30m}
+      cookie:
+        name: SAPIENSML_VIEWER_SESSION
+        http-only: true
+        # Lax: the identity provider's redirect back is a top-level GET from another site
+        same-site: lax
+        secure: ${VIEWER_COOKIE_SECURE:true}
+  error:
+    include-message: never
+    include-stacktrace: never
+    whitelabel:
+      enabled: false
+  tomcat:
+    max-http-response-header-size: 16KB
+    connection-timeout: 20s
+
+management:
+  server:
+    # Health and info on their own port, on loopback only: nginx and monitoring on the same host reach them,
+    # browsers never do
+    port: ${VIEWER_MANAGEMENT_PORT:8081}
+    address: ${VIEWER_MANAGEMENT_ADDRESS:127.0.0.1}
+    # Plain HTTP even when the viewer serves HTTPS itself (Windows, server.ssl.*): it would otherwise inherit the
+    # certificate, and the installers' loopback health checks would fail
+    ssl:
+      enabled: false
+  endpoints:
+    wins:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+      show-components: always
+  info:
+    java:
+      enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.sapiensml.viewer: ${VIEWER_LOG_LEVEL:INFO}
+
+viewer:
+  # The Alfresco connection normally comes from the admin page (/admin). These values are used only until one has
+  # been saved there; all may stay empty.
+  alfresco:
+    base-url: ${VIEWER_ALFRESCO_BASE_URL:}
+    auth-type: ${VIEWER_ALFRESCO_AUTH:CLIENT_CREDENTIALS}
+    token-uri: ${VIEWER_ALFRESCO_TOKEN_URI:}
+    client-id: ${VIEWER_ALFRESCO_CLIENT_ID:}
+    client-secret: ${VIEWER_ALFRESCO_CLIENT_SECRET:}
+    scope: ${VIEWER_ALFRESCO_SCOPE:}
+    username: ${VIEWER_ALFRESCO_USERNAME:}
+    password: ${VIEWER_ALFRESCO_PASSWORD:}
+    connect-timeout: ${VIEWER_ALFRESCO_CONNECT_TIMEOUT:5s}
+    read-timeout: ${VIEWER_ALFRESCO_READ_TIMEOUT:60s}
+    max-connections: ${VIEWER_ALFRESCO_MAX_CONNECTIONS:100}
+  security:
+    roles-claim: ${VIEWER_ROLES_CLAIM:roles}
+    viewer-roles: ${VIEWER_ROLES:DOCUMENT_VIEWER}
+    admin-roles: ${VIEWER_ADMIN_ROLES:VIEWER_ADMIN}
+    idp-hint: ${VIEWER_OIDC_IDP_HINT:}
+    frame-ancestors: ${VIEWER_FRAME_ANCESTORS:}
+  access:
+    allowed-ancestor-ids: ${VIEWER_ALLOWED_FOLDER_IDS:}
+    allowed-node-types: ${VIEWER_ALLOWED_NODE_TYPES:}
+  ui:
+    application-name: ${VIEWER_APP_NAME:SapiensML Document Viewer}
+    allow-download: ${VIEWER_ALLOW_DOWNLOAD:false}
+    allow-print: ${VIEWER_ALLOW_PRINT:true}
+    # The application whose links open documents (for example FINEOS), named in the page's hints
+    source-application: ${VIEWER_SOURCE_APPLICATION:}
+    # Repository properties shown next to a document, in order: prefix:name=Label, comma separated. Nothing else
+    # reaches the browser. Example for a custom model: cm:title=Title,ins:caseNumber=Case,ins:documentType=Type
+    display-properties: "${VIEWER_DISPLAY_PROPERTIES:cm:title=Title,cm:description=Description,cm:author=Author}"
+  settings:
+    # The admin page's saved connection (alfresco-settings.json); secrets in it are encrypted with this key
+    dir: ${VIEWER_SETTINGS_DIR:viewer-data}
+    key: ${VIEWER_SETTINGS_KEY:}
+    allow-insecure-http: ${VIEWER_SETTINGS_ALLOW_HTTP:false}
+  audit:
+    # prod profile only (logback-spring.xml): the audit trail's own file
+    dir: ${VIEWER_AUDIT_DIR:/var/log/sapiensml-document-viewer}
+    retention-days: ${VIEWER_AUDIT_RETENTION_DAYS:400}

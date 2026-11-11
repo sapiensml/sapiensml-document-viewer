@@ -1,0 +1,10 @@
+SapiensML Document Viewer
+Copyright 2026 SapiensML Technologies
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+The release packages also contain third-party software, each under its own licence:
+Spring Boot, Spring Framework, Spring Security, Apache HttpComponents and PDF.js
+(Apache License 2.0), and React (MIT License), among others. Their licence and
+notice files are kept inside the bundled jar files, under /pdfjs in the
+application, and in the bundled browser code.

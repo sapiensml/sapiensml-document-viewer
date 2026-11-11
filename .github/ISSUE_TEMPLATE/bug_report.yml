@@ -1,0 +1,50 @@
+name: Bug report
+description: Something doesn't work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. **Never paste passwords, client secrets, tokens, real documents, node IDs from a production repository or personal data.** Replace them with made-up values. Security issues go through SECURITY.md, not here.
+  - type: input
+    id: version
+    attributes:
+      label: Viewer version
+      description: The VERSION file of the release package, or /actuator/info on the management port
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Installed on
+      options:
+        - Linux (install.sh)
+        - Windows (install.ps1)
+        - Local development (deploy/local)
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: alfresco
+    attributes:
+      label: Alfresco edition and version
+      placeholder: Alfresco Community 26.2, Alfresco PaaS, ...
+  - type: input
+    id: idp
+    attributes:
+      label: Identity provider
+      placeholder: Keycloak 26.8, Okta, ...
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: The steps, what you expected and what you saw instead
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log lines
+      description: The relevant lines from the viewer's log. Remove anything secret or personal first.
+      render: text

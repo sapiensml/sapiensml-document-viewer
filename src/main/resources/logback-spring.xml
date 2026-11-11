@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Default (local, tests): readable console output.
+  prod profile: JSON lines (Elastic Common Schema) on the console for journald, and the audit trail in its own
+  rolling JSON file, viewer.audit.dir (VIEWER_AUDIT_DIR, default /var/log/sapiensml-document-viewer).
+-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <springProfile name="!prod">
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <springProperty name="AUDIT_DIR" source="viewer.audit.dir" defaultValue="/var/log/sapiensml-document-viewer"/>
+        <springProperty name="AUDIT_DAYS" source="viewer.audit.retention-days" defaultValue="400"/>
+        <springProperty name="APP_NAME" source="spring.application.name"/>
+
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="org.springframework.boot.logging.logback.StructuredLogEncoder">
+                <format>ecs</format>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+
+        <appender name="AUDIT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>${AUDIT_DIR}/audit.json</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+                <fileNamePattern>${AUDIT_DIR}/audit-%d{yyyy-MM-dd}.%i.json.gz</fileNamePattern>
+                <maxFileSize>100MB</maxFileSize>
+                <maxHistory>${AUDIT_DAYS}</maxHistory>
+                <totalSizeCap>20GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder class="org.springframework.boot.logging.logback.StructuredLogEncoder">
+                <format>ecs</format>
+                <charset>UTF-8</charset>
+            </encoder>
+        </appender>
+
+        <logger name="AUDIT" level="INFO" additivity="true">
+            <appender-ref ref="AUDIT_FILE"/>
+        </logger>
+
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+        </root>
+    </springProfile>
+</configuration>
