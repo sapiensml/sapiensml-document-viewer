@@ -15,7 +15,7 @@ RUN npm ci --no-audit --no-fund
 COPY frontend/ ./
 RUN npm run build
 
-FROM --platform=$BUILDPLATFORM maven:3.9.16-eclipse-temurin-21-noble@sha256:99e61abcff91a9b1333463bd8451fb18495d6eba9250ac66a338b518f8278320 AS jar
+FROM --platform=$BUILDPLATFORM maven:3.9-eclipse-temurin-26-noble@sha256:b2c1ad85954592f9928e84327c65201f308ad9b5d8ed7d5b823717c97bf23fbb AS jar
 WORKDIR /build
 COPY pom.xml LICENSE NOTICE ./
 COPY src ./src
@@ -23,7 +23,7 @@ COPY --from=ui /build/frontend/dist ./frontend/dist
 # -Dviewer.skipUi=true packages the UI built above instead of running npm again
 RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp -DskipTests -Dviewer.skipUi=true package
 
-FROM eclipse-temurin:21.0.13_9-jre-alpine-3.23@sha256:e4fc591be0478866dd325d05dd920618c57d891d3e8ccc6925393fb0ec0942a6
+FROM eclipse-temurin:21-jre-alpine-3.20@sha256:3ce6d389fc60453114bf9ec58d6082daf052e2410104652c455482846ac794ab
 LABEL org.opencontainers.image.title="SapiensML Document Viewer" \
       org.opencontainers.image.description="Secure viewer for Alfresco documents, opened by link from business applications, with OpenID Connect sign-in" \
       org.opencontainers.image.vendor="SapiensML Technologies" \
