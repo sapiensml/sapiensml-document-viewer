@@ -1,7 +1,7 @@
 # Weekly dependency updates. Minor and patch updates are grouped into one pull request per ecosystem. New versions
-# wait 14 days before Dependabot proposes them. Major versions of Maven and npm dependencies (Spring Boot, Vite,
-# TypeScript, ...) are planned upgrades, so Dependabot doesn't propose them; security updates still arrive for any
-# version, because ignore rules by update type apply to version updates only.
+# wait 14 days before Dependabot proposes them. Major versions of Maven and npm dependencies and of the Docker images
+# (Spring Boot, Vite, TypeScript, Keycloak, ...) are planned upgrades, so Dependabot doesn't propose them; security
+# updates still arrive for any version, because ignore rules by update type apply to version updates only.
 version: 2
 updates:
   - package-ecosystem: maven
@@ -28,6 +28,33 @@ updates:
         update-types: [version-update:semver-major]
     groups:
       npm-minor-and-patch:
+        update-types: [minor, patch]
+
+  # The Dockerfile's base images and the quick start's Keycloak and BusyBox, pinned by digest
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+    ignore:
+      - dependency-name: '*'
+        update-types: [version-update:semver-major]
+    groups:
+      docker-images:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker-compose
+    directory: /deploy/docker
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 14
+    ignore:
+      - dependency-name: '*'
+        update-types: [version-update:semver-major]
+    groups:
+      quick-start-images:
         update-types: [minor, patch]
 
   - package-ecosystem: github-actions

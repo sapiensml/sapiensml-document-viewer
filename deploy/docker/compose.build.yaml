@@ -1,0 +1,9 @@
+# Builds the viewer image from this checkout instead of pulling the published one:
+#
+#   docker compose -f deploy/docker/compose.yaml -f deploy/docker/compose.build.yaml up -d --build
+
+services:
+  viewer:
+    image: sapiensml-document-viewer:local
+    build:
+      context: ../..
