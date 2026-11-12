@@ -19,6 +19,18 @@ Works with Alfresco Content Services (Community or Enterprise, 7.x and later) an
 - **Windows Server installer:** [DEPLOY-WINDOWS.md](DEPLOY-WINDOWS.md) (`.\install.ps1 All ...`) does the same on Windows.
 - **Docker:** [DEPLOY-DOCKER.md](DEPLOY-DOCKER.md) covers the image `ghcr.io/sapiensml/sapiensml-document-viewer` (amd64 and arm64) and a one-command quick start with Keycloak.
 
+## Screenshots
+
+A PDF with its details panel, which shows only the repository properties the viewer is configured to show:
+
+![A test claim form opened in the viewer, with the details panel](docs/images/viewer-pdf.png)
+
+A Word document, shown as Alfresco's PDF rendition:
+
+![A test Word letter shown as a PDF rendition](docs/images/viewer-word-rendition.png)
+
+Both use synthetic test documents.
+
 ## How it works
 
 ```mermaid
