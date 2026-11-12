@@ -1,6 +1,6 @@
 # Deploying the SapiensML Document Viewer on Linux
 
-The viewer runs as a systemd service from a single jar, with nginx in front for TLS. No containers. The install scripts install whatever the server is missing with its own package manager, so a fresh minimal server is enough.
+The viewer runs as a systemd service from a single jar, with nginx in front for TLS. No containers (to run the viewer in Docker instead, see [DEPLOY-DOCKER.md](DEPLOY-DOCKER.md)). The install scripts install whatever the server is missing with its own package manager, so a fresh minimal server is enough.
 
 Supported: RHEL, Rocky, Alma and Oracle Linux 8 and 9, Amazon Linux 2023, Fedora (dnf/yum); Ubuntu 22.04/24.04 and Debian 12 (apt); SUSE 15 (zypper); x86_64 or aarch64, with systemd. The scripts have been checked on macOS (shellcheck, settings handling, certificates, Java trust store, Keycloak production mode) but not yet run end to end on each distribution: try them on a test server first.
 

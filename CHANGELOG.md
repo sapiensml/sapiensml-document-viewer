@@ -4,6 +4,11 @@ All notable changes to the SapiensML Document Viewer. The format follows [Keep a
 
 ## [Unreleased]
 
+### Added
+
+- **Docker image** `ghcr.io/sapiensml/sapiensml-document-viewer` for linux/amd64 and linux/arm64. It runs as a non-root user, has health checks, and is signed with build provenance. Each release publishes it. See DEPLOY-DOCKER.md.
+- **Docker Compose quick start** (`deploy/docker/compose.yaml`): Keycloak with the `sapiensml` realm, the test users and the viewer, with one command. CI builds the image and signs in through it on every change.
+
 ## [1.0.0] - 2026-11-11
 
 First public release.

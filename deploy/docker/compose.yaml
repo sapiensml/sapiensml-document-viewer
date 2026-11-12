@@ -1,0 +1,109 @@
+# Quick start: Keycloak and the viewer in Docker on one machine, for trying the viewer.
+#
+#   docker compose -f deploy/docker/compose.yaml up -d                     # the published image
+#   docker compose -f deploy/docker/compose.yaml -f deploy/docker/compose.build.yaml up -d --build   # built from this checkout
+#
+# Then open http://localhost:18200/admin as vieweradmin/vieweradmin and enter the Alfresco connection. Test users:
+# viewer/viewer (can view), vieweradmin/vieweradmin (can view and administer), noaccess/noaccess (neither). Keycloak's
+# admin console: http://localhost:18210/admin (admin/admin).
+#
+# Not for production: Keycloak runs in development mode with the vendor-default admin password, and everything listens
+# on localhost only. See DEPLOY-DOCKER.md for running the image in production.
+#
+# The viewer shares the Keycloak container's network, so the viewer and your browser both reach Keycloak as
+# http://localhost:18210: the sign-in issuer is the same for both, with no hosts-file changes.
+
+name: sapiensml-document-viewer
+
+services:
+  realm:
+    # Fills the client secret and the viewer's addresses into the realm template, as deploy/local/keycloak.sh does
+    image: busybox:1.37.0@sha256:a7dbc319b1438115a207e11930dc4bb3e643dcb3ec0bdd694bb36cd8fad289ec
+    command:
+      - sh
+      - -c
+      - >-
+        sed -e "s|@VIEWER_CLIENT_SECRET@|$$VIEWER_OIDC_CLIENT_SECRET|"
+        -e "s|@VIEWER_REDIRECT_URIS@|\"http://localhost:18200/login/oauth2/code/viewer\"|"
+        -e "s|@VIEWER_POST_LOGOUT_URIS@|http://localhost:18200/signed-out|"
+        /template/sapiensml-realm.template.json > /import/sapiensml-realm.json
+    environment:
+      VIEWER_OIDC_CLIENT_SECRET: ${VIEWER_OIDC_CLIENT_SECRET:-quickstart-client-secret}
+    volumes:
+      - ../keycloak/sapiensml-realm.template.json:/template/sapiensml-realm.template.json:ro
+      - realm-import:/import
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.2@sha256:723b1d6e254c0fc96d5cffec860c7e0744d6a3277822b865bb538cf891575e41
+    command: ["start-dev", "--import-realm", "--http-port=18210", "--health-enabled=true"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "127.0.0.1:18210:18210" # Keycloak
+      - "127.0.0.1:18200:18200" # the viewer, which runs in this container's network
+    extra_hosts:
+      # Lets the viewer reach an Alfresco running on this machine as http://host.docker.internal:<port>
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - realm-import:/opt/keycloak/data/import:ro
+    depends_on:
+      realm:
+        condition: service_completed_successfully
+    healthcheck:
+      # The Keycloak image has no curl or wget: ask the management port with bash
+      test:
+        - CMD
+        - bash
+        - -c
+        - >-
+          exec 3<>/dev/tcp/127.0.0.1/9000 &&
+          printf 'GET /health/ready HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n' >&3 &&
+          grep -q '"UP"' <&3
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 20s
+
+  keycloak-users:
+    # Creates the test users once Keycloak is ready
+    image: quay.io/keycloak/keycloak:26.8.2@sha256:723b1d6e254c0fc96d5cffec860c7e0744d6a3277822b865bb538cf891575e41
+    network_mode: service:keycloak
+    entrypoint: ["bash", "/scripts/keycloak-users.sh"]
+    environment:
+      KEYCLOAK_URL: http://localhost:18210
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./keycloak-users.sh:/scripts/keycloak-users.sh:ro
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+  viewer:
+    image: ${VIEWER_IMAGE:-ghcr.io/sapiensml/sapiensml-document-viewer:latest}
+    network_mode: service:keycloak
+    environment:
+      VIEWER_OIDC_ISSUER_URI: http://localhost:18210/realms/sapiensml
+      VIEWER_OIDC_CLIENT_SECRET: ${VIEWER_OIDC_CLIENT_SECRET:-quickstart-client-secret}
+      VIEWER_PORT: "18200"
+      VIEWER_MANAGEMENT_PORT: "18201"
+      VIEWER_MANAGEMENT_ADDRESS: 127.0.0.1
+      # Plain http on localhost; behind TLS in production
+      VIEWER_COOKIE_SECURE: "false"
+      VIEWER_ALLOW_DOWNLOAD: "true"
+      # true lets the admin page accept an http:// Alfresco address (for example one on this machine)
+      VIEWER_SETTINGS_ALLOW_HTTP: ${VIEWER_SETTINGS_ALLOW_HTTP:-false}
+    volumes:
+      - viewer-data:/var/lib/sapiensml-document-viewer
+      - viewer-audit:/var/log/sapiensml-document-viewer
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      keycloak-users:
+        condition: service_completed_successfully
+
+volumes:
+  realm-import:
+  viewer-data:
+  viewer-audit:

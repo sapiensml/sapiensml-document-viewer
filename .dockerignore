@@ -1,0 +1,12 @@
+# Only what the image build needs goes to the Docker daemon
+.git
+.github
+.idea
+.vscode
+**/.DS_Store
+target
+deploy
+frontend/node_modules
+frontend/dist
+frontend/public/pdfjs
+*.md

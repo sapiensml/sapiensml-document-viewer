@@ -13,7 +13,11 @@ Business applications (FINEOS, Guidewire, Salesforce, a customer portal, a case-
 
 The browser never talks to Alfresco and never holds a token. An administrator enters the Alfresco connection once on the viewer's admin page (`/admin`); it is tested before it is saved and kept on the server with the secret encrypted.
 
-Works with Alfresco Content Services (Community or Enterprise, 7.x and later) and Alfresco PaaS, with Basic authentication or OAuth2 client credentials (Alfresco Identity Service). Spring Boot 4.1 (Java 21) and React 19 (PDF.js 6), shipped as one jar. No containers needed; installers for [Linux](DEPLOY.md) (`sudo ./install.sh all ...`) and [Windows Server](DEPLOY-WINDOWS.md) (`.\install.ps1 All ...`) set up a fresh server completely, Keycloak and PostgreSQL included.
+Works with Alfresco Content Services (Community or Enterprise, 7.x and later) and Alfresco PaaS, with Basic authentication or OAuth2 client credentials (Alfresco Identity Service). Spring Boot 4.1 (Java 21) and React 19 (PDF.js 6), shipped as one jar. Three ways to run it:
+
+- **Linux installer:** [DEPLOY.md](DEPLOY.md) (`sudo ./install.sh all ...`) sets up a fresh server completely, Keycloak and PostgreSQL included, with no containers.
+- **Windows Server installer:** [DEPLOY-WINDOWS.md](DEPLOY-WINDOWS.md) (`.\install.ps1 All ...`) does the same on Windows.
+- **Docker:** [DEPLOY-DOCKER.md](DEPLOY-DOCKER.md) covers the image `ghcr.io/sapiensml/sapiensml-document-viewer` (amd64 and arm64) and a one-command quick start with Keycloak.
 
 ## How it works
 
@@ -104,7 +108,9 @@ The viewer speaks plain OpenID Connect, so changing provider is configuration on
 - **Okta directly.** An OIDC *Web* app (authorization code, PKCE, client secret) with the redirect URIs above and a `groups` claim in the ID token; then `VIEWER_OIDC_ISSUER_URI=https://<org>.okta.com/oauth2/<server id>`, `VIEWER_ROLES_CLAIM=groups`, `VIEWER_ROLES=<group>`, `VIEWER_ADMIN_ROLES=<admin group>`.
 - **Microsoft Entra ID directly.** An app registration (web, client secret) with the redirect URIs above and app roles assigned to users; then `VIEWER_OIDC_ISSUER_URI=https://login.microsoftonline.com/<tenant id>/v2.0` and `VIEWER_ROLES_CLAIM=roles`.
 
-## Run locally (no Docker)
+## Run locally
+
+With Docker, one command starts Keycloak, the test users and the viewer: `docker compose -f deploy/docker/compose.yaml up -d` (see [DEPLOY-DOCKER.md](DEPLOY-DOCKER.md)). Without Docker:
 
 Needs JDK 21, Maven 3.9 and Node.js 22.13 or later.
 

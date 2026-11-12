@@ -41,7 +41,7 @@ jobs:
         run: ./deploy/package.sh
 
       - name: Check the shell scripts parse
-        run: for script in deploy/package.sh deploy/linux/*.sh deploy/local/*.sh; do bash -n "$script"; done
+        run: for script in deploy/package.sh deploy/linux/*.sh deploy/local/*.sh deploy/docker/*.sh; do bash -n "$script"; done
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -51,3 +51,44 @@ jobs:
             target/sapiensml-document-viewer-*-windows.zip
           if-no-files-found: error
           retention-days: 14
+
+  docker:
+    name: Docker image and quick start
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      COMPOSE_FILE: deploy/docker/compose.yaml
+      VIEWER_IMAGE: sapiensml-document-viewer:ci
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build the image
+        run: docker build --tag "$VIEWER_IMAGE" .
+
+      # Keycloak, the test users and the viewer from the image just built
+      - name: Start the quick start
+        run: docker compose up --detach
+
+      - name: Wait until the viewer is healthy
+        run: |
+          viewer=$(docker compose ps --quiet viewer)
+          for _ in $(seq 1 60); do
+            status=$(docker inspect --format '{{.State.Health.Status}}' "$viewer")
+            echo "viewer: $status"
+            [ "$status" = healthy ] && exit 0
+            sleep 5
+          done
+          exit 1
+
+      - name: Sign in through Keycloak
+        run: ./deploy/docker/smoke-test.sh
+
+      - name: Logs
+        if: always()
+        run: docker compose logs --no-color
+
+      - name: Stop
+        if: always()
+        run: docker compose down --volumes
