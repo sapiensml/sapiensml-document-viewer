@@ -30,7 +30,9 @@ updates:
       npm-minor-and-patch:
         update-types: [minor, patch]
 
-  # The Dockerfile's base images and the quick start's Keycloak and BusyBox, pinned by digest
+  # The Dockerfile's base images and the quick start's Keycloak and BusyBox, pinned by digest. Dependabot misreads the
+  # Maven and Temurin tags (it proposed Java 26 for the build and Alpine 3.20 for the runtime), so those two are
+  # updated by hand with each quarterly Java security release: keep Java 21 and a supported Alpine.
   - package-ecosystem: docker
     directory: /
     schedule:
@@ -40,6 +42,8 @@ updates:
     ignore:
       - dependency-name: '*'
         update-types: [version-update:semver-major]
+      - dependency-name: maven
+      - dependency-name: eclipse-temurin
     groups:
       docker-images:
         update-types: [minor, patch]
