@@ -81,7 +81,7 @@ Everything comes from environment variables: on Linux in `/etc/sapiensml-documen
 
 | Variable | Example | Meaning |
 |---|---|---|
-| `VIEWER_OIDC_ISSUER_URI` | `https://sso.sapiensml.com/realms/sapiensml` | Identity provider (read at start-up) |
+| `VIEWER_OIDC_ISSUER_URI` | `https://sso.example.com/realms/sapiensml` | Identity provider (read at start-up) |
 | `VIEWER_OIDC_CLIENT_ID`, `VIEWER_OIDC_CLIENT_SECRET` | `sapiensml-document-viewer` | The viewer's client at the identity provider |
 | `VIEWER_ROLES_CLAIM`, `VIEWER_ROLES` | `roles`, `DOCUMENT_VIEWER` | Claim with roles or groups, and the values that may view |
 | `VIEWER_ADMIN_ROLES` | `VIEWER_ADMIN` | Claim values that may use the admin page |
@@ -113,11 +113,11 @@ Needs JDK 21, Maven 3.9 and Node 20.
 ./deploy/local/run-viewer.sh --build # http://localhost:18200
 ```
 
-The first time, open http://localhost:18200/admin, sign in as `vieweradmin` / `vieweradmin`, and enter the Alfresco connection, for example the SapiensML test repository:
+The first time, open http://localhost:18200/admin, sign in as `vieweradmin` / `vieweradmin`, and enter the Alfresco connection, for example for a self-hosted repository:
 
 | Field | Value |
 |---|---|
-| Repository address | `https://alfresco.sapiensml.com` |
+| Repository address | `https://alfresco.example.com` |
 | Sign-in to Alfresco | User name and password (a repository user that can read the document folders) |
 | Allowed folders | The node IDs of the folders whose documents may open |
 
@@ -154,7 +154,7 @@ Community support is best effort, through GitHub issues. [SapiensML](https://sap
 
 ## About
 
-Built and supported by [SapiensML](https://sapiensml.com): enterprise content management consulting and customization across the Hyland, OpenText and IBM ecosystems, AI business automation and custom software. Implementation partner: Plus Your Softech.
+Built and supported by [SapiensML](https://sapiensml.com): enterprise content management consulting and customization across the Hyland, OpenText and IBM ecosystems, AI business automation and custom software.
 
 ## Licence
 

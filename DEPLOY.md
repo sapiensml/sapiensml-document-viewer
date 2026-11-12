@@ -10,7 +10,7 @@ Two host names pointing at the server (one for the viewer, one for Keycloak), th
 
 ```bash
 tar -xzf sapiensml-document-viewer-<version>.tar.gz && cd sapiensml-document-viewer-<version>
-sudo ./install.sh all --viewer-host viewer.sapiensml.com --keycloak-host sso.sapiensml.com \
+sudo ./install.sh all --viewer-host viewer.example.com --keycloak-host sso.example.com \
      --cert /path/fullchain.pem --key /path/privkey.pem        # or --self-signed on a test server
 ```
 
@@ -82,7 +82,7 @@ Edit `/etc/sapiensml-document-viewer/viewer.env` and replace every `CHANGE_ME`: 
 ```bash
 sudo systemctl start sapiensml-document-viewer
 sudo ./install.sh status                       # service state and health
-sudo ./install.sh nginx --server-name viewer.sapiensml.com \
+sudo ./install.sh nginx --server-name viewer.example.com \
      --cert /etc/pki/tls/certs/viewer.pem --key /etc/pki/tls/private/viewer.key
 ```
 
@@ -90,11 +90,11 @@ The `nginx` step installs nginx if missing, writes `/etc/nginx/conf.d/sapiensml-
 
 ## 5. Enter the Alfresco connection (once)
 
-Open `https://viewer.sapiensml.com/admin` and sign in as a user with the `VIEWER_ADMIN` role. Until this is done, users who open a document see "The viewer has not been set up yet".
+Open `https://viewer.example.com/admin` and sign in as a user with the `VIEWER_ADMIN` role. Until this is done, users who open a document see "The viewer has not been set up yet".
 
-| Field | Example: Alfresco PaaS | Example: SapiensML test repository |
+| Field | Example: Alfresco PaaS | Example: self-hosted Alfresco |
 |---|---|---|
-| Repository address | `https://<tenant>.alfrescocloud.com` | `https://alfresco.sapiensml.com` |
+| Repository address | `https://<tenant>.alfrescocloud.com` | `https://alfresco.example.com` |
 | Sign-in to Alfresco | Service account (OAuth2 client credentials) | User name and password |
 | Token endpoint | *Use the standard path* | - |
 | Account | The viewer's client ID and secret in the PaaS realm | A repository user that can read the document folders |
@@ -102,13 +102,13 @@ Open `https://viewer.sapiensml.com/admin` and sign in as a user with the `VIEWER
 
 *Test connection* gets a token, calls Alfresco as the account and opens each folder. *Save* runs the same test and saves only if it passes; the viewer uses the new connection at once, no restart. The settings are in `/var/lib/sapiensml-document-viewer/alfresco-settings.json` (readable by `sapiensml` only, secret encrypted). To rotate the secret later, enter the new one on the same page. The stored secret is never shown, and is kept only while the token endpoint and client ID stay the same.
 
-Test: `https://viewer.sapiensml.com/documents/<node id of a document in an allowed folder>`.
+Test: `https://viewer.example.com/documents/<node id of a document in an allowed folder>`.
 
 ## 6. Keycloak on the same or another server (only if there is none to use)
 
 ```bash
-sudo ./install-keycloak.sh --hostname https://sso.sapiensml.com --viewer-url https://viewer.sapiensml.com \
-     --local-postgres --server-name sso.sapiensml.com --cert /path/sso.pem --key /path/sso.key \
+sudo ./install-keycloak.sh --hostname https://sso.example.com --viewer-url https://viewer.example.com \
+     --local-postgres --server-name sso.example.com --cert /path/sso.pem --key /path/sso.key \
      --viewer-env /etc/sapiensml-document-viewer/viewer.env --first-user vieweradmin
 ```
 
@@ -139,7 +139,7 @@ If the new release does not become healthy within 3 minutes, `install` switches 
 
 | Symptom | Look at |
 |---|---|
-| `install.sh all` stops with "cannot resolve sso.sapiensml.com" | Create DNS records for both names, or use `--add-hosts` on a test server |
+| `install.sh all` stops with "cannot resolve sso.example.com" | Create DNS records for both names, or use `--add-hosts` on a test server |
 | Viewer log: `PKIX path building failed` when reaching Keycloak | The Keycloak certificate is signed by an internal CA: run `all` with `--ca-cert`, or add the CA to a trust store as in `JAVA_OPTS` |
 | Service does not start, log says the issuer cannot be reached | `VIEWER_OIDC_ISSUER_URI`; the identity provider must answer when the viewer starts (systemd retries every 10 s) |
 | Sign-in ends with "Invalid redirect uri" at Keycloak/Okta | The client's redirect URI must be exactly `https://<viewer host>/login/oauth2/code/viewer`; nginx must pass `X-Forwarded-Proto` (the generated site does) |

@@ -29,7 +29,7 @@ Supported: Windows Server 2016, 2019, 2022 and 2025 (x64), with the built-in Win
 Two host names pointing at the server (one for the viewer, one for Keycloak), then:
 
 ```powershell
-.\install.ps1 All -ViewerHost viewer.sapiensml.com -KeycloakHost sso.sapiensml.com `
+.\install.ps1 All -ViewerHost viewer.example.com -KeycloakHost sso.example.com `
     -PfxFile C:\certs\sapiensml.pfx -PfxPassword (Read-Host -AsSecureString 'PFX password')
 # or, on a test server: -SelfSigned instead of -PfxFile/-PfxPassword
 ```
@@ -40,8 +40,8 @@ The `.pfx` must hold the certificate (with its chain) for both names. Use `-Keyc
 2. Installs Java 21 if none is found.
 3. Downloads WinSW.
 4. Installs PostgreSQL 17 with a `keycloak` database, listening on localhost only.
-5. Installs Keycloak with the `sapiensml` realm on **https://sso.sapiensml.com:8443**.
-6. Installs the viewer on **https://viewer.sapiensml.com** and writes its sign-in settings.
+5. Installs Keycloak with the `sapiensml` realm on **https://sso.example.com:8443**.
+6. Installs the viewer on **https://viewer.example.com** and writes its sign-in settings.
 7. Opens the two ports in Windows Firewall.
 8. Creates the first user `vieweradmin` (roles `VIEWER_ADMIN` and `DOCUMENT_VIEWER`) and prints a one-time password.
 9. Starts both services and waits until the viewer is healthy.
@@ -79,23 +79,23 @@ Nothing already installed is upgraded. The services run as their own virtual acc
 ## Step by step (when Keycloak or Okta already exists)
 
 ```powershell
-.\install.ps1 Install -ViewerHost viewer.sapiensml.com -PfxFile C:\certs\viewer.pfx -PfxPassword (Read-Host -AsSecureString)
+.\install.ps1 Install -ViewerHost viewer.example.com -PfxFile C:\certs\viewer.pfx -PfxPassword (Read-Host -AsSecureString)
 notepad C:\ProgramData\SapiensML\viewer\viewer.properties     # replace each CHANGE_ME: issuer, client ID and secret
 Start-Service sapiensml-document-viewer
 .\install.ps1 Status
 ```
 
-The identity provider's client needs the redirect URI `https://viewer.sapiensml.com/login/oauth2/code/viewer` and the post-logout redirect URI `https://viewer.sapiensml.com/signed-out`. `viewer.properties` explains each setting. It is a Java properties file: write paths with `/`, and a backslash as `\\`. To run Keycloak on this server later: `.\install-keycloak.ps1 -KeycloakHost ... -ViewerUrl https://viewer.sapiensml.com -PfxFile ... -PfxPassword ... -Db Local -ViewerProperties C:\ProgramData\SapiensML\viewer\viewer.properties -FirstUser vieweradmin`.
+The identity provider's client needs the redirect URI `https://viewer.example.com/login/oauth2/code/viewer` and the post-logout redirect URI `https://viewer.example.com/signed-out`. `viewer.properties` explains each setting. It is a Java properties file: write paths with `/`, and a backslash as `\\`. To run Keycloak on this server later: `.\install-keycloak.ps1 -KeycloakHost ... -ViewerUrl https://viewer.example.com -PfxFile ... -PfxPassword ... -Db Local -ViewerProperties C:\ProgramData\SapiensML\viewer\viewer.properties -FirstUser vieweradmin`.
 
 Behind IIS or a load balancer that terminates TLS, set `VIEWER_ADDRESS=127.0.0.1`, `VIEWER_PORT=8080` and `server.ssl.enabled=false` in `viewer.properties`, and forward `X-Forwarded-For`, `X-Forwarded-Proto` and `Host` to the viewer.
 
 ## Enter the Alfresco connection (once)
 
-Open `https://viewer.sapiensml.com/admin` as a user with the `VIEWER_ADMIN` role and enter:
+Open `https://viewer.example.com/admin` as a user with the `VIEWER_ADMIN` role and enter:
 
-| Field | Example: Alfresco PaaS | Example: SapiensML test repository |
+| Field | Example: Alfresco PaaS | Example: self-hosted Alfresco |
 |---|---|---|
-| Repository address | `https://<tenant>.alfrescocloud.com` | `https://alfresco.sapiensml.com` |
+| Repository address | `https://<tenant>.alfrescocloud.com` | `https://alfresco.example.com` |
 | Sign-in to Alfresco | Service account (OAuth2 client credentials) | User name and password |
 | Token endpoint | *Use the standard path* | - |
 | Account | The viewer's client ID and secret in the PaaS realm | A repository user that can read the document folders |
@@ -128,7 +128,7 @@ Open `https://viewer.sapiensml.com/admin` as a user with the `VIEWER_ADMIN` role
 |---|---|
 | "running scripts is disabled on this system" | `Set-ExecutionPolicy -Scope Process Bypass` in the same window, and `Unblock-File` the scripts |
 | "Port 443 is already used by w3wp/System" | IIS or HTTP.sys holds the port: remove the site's https binding (IIS Manager > Default Web Site > Bindings), or use `-ViewerPort` |
-| "cannot resolve sso.sapiensml.com" | Create DNS records for both names, or use `-AddHosts` on a test server |
+| "cannot resolve sso.example.com" | Create DNS records for both names, or use `-AddHosts` on a test server |
 | The viewer service stops right after starting | `C:\ProgramData\SapiensML\viewer\logs\sapiensml-document-viewer.out.log`. `PKIX path building failed` means the Keycloak certificate comes from an internal CA: run again with `-CaCert` |
 | "You cannot view documents" after signing in | The user lacks the role, or `VIEWER_ROLES_CLAIM` / `VIEWER_ROLES` do not match what the identity provider sends |
 | "The viewer has not been set up yet" | Enter the Alfresco connection at `/admin` |

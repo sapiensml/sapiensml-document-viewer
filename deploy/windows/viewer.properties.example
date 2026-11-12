@@ -22,8 +22,8 @@ VIEWER_ADMIN_ROLES=VIEWER_ADMIN
 # Normally entered once on the admin page (https://<viewer>/admin); kept in VIEWER_SETTINGS_DIR with its secret
 # encrypted by VIEWER_SETTINGS_KEY (install.ps1 generates it: keep a copy in the password manager). Values set
 # here are used only until something is saved there.
-# Alfresco with repository users (Community or Enterprise), for example the SapiensML test repository:
-#VIEWER_ALFRESCO_BASE_URL=https://alfresco.sapiensml.com
+# Alfresco with repository users (Community or Enterprise), for example:
+#VIEWER_ALFRESCO_BASE_URL=https://alfresco.example.com
 #VIEWER_ALFRESCO_AUTH=BASIC
 #VIEWER_ALFRESCO_USERNAME=
 #VIEWER_ALFRESCO_PASSWORD=
