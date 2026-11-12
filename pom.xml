@@ -12,7 +12,7 @@
 
     <groupId>com.sapiensml</groupId>
     <artifactId>sapiensml-document-viewer</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>SapiensML Document Viewer</name>
     <description>SapiensML Document Viewer: opens Alfresco documents from links in business applications. OIDC sign-in, service-account access to Alfresco, React viewer</description>
     <url>https://sapiensml.com</url>

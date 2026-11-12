@@ -12,7 +12,7 @@ Thank you for helping to improve the SapiensML Document Viewer. Bug reports, fix
 
 ## Development setup
 
-You need Java 21, Maven 3.9 and Node.js 22 (or 20). No Docker is needed. "Run locally" in the [README](README.md) starts a local Keycloak and the viewer.
+You need Java 21, Maven 3.9 and Node.js 22.13 or later. No Docker is needed. "Run locally" in the [README](README.md) starts a local Keycloak and the viewer.
 
 ```bash
 mvn verify                        # UI tests, UI build, Java tests, 80% line coverage gate

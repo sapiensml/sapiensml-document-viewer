@@ -106,7 +106,7 @@ The viewer speaks plain OpenID Connect, so changing provider is configuration on
 
 ## Run locally (no Docker)
 
-Needs JDK 21, Maven 3.9 and Node 20.
+Needs JDK 21, Maven 3.9 and Node.js 22.13 or later.
 
 ```bash
 ./deploy/local/keycloak.sh start     # first time: downloads Keycloak 26.8.2, imports realm sapiensml, port 18210
