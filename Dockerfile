@@ -8,7 +8,7 @@
 #
 # Settings, volumes and health checks: DEPLOY-DOCKER.md. Tests run in CI, not here.
 
-FROM --platform=$BUILDPLATFORM node:22.23.3-alpine3.23@sha256:baf676f7d0e552f3231945c2f979055ca121bce128c152f7a34e6bd1728b1c5a AS ui
+FROM --platform=$BUILDPLATFORM node:22.23.4-alpine3.23@sha256:2cfe8c19bd3df0192ad5dfd2e13e86567743ffa1eb614e750a706891f19606af AS ui
 WORKDIR /build/frontend
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund
